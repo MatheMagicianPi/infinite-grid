@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -14,8 +13,7 @@ public class AutomataGrid {
 
     public static void main(String[] args) throws Exception {
         AutomataGrid ag = new AutomataGrid(
-            // randomInitialRow(100), (long) (Integer.parseInt("0010000000000000000000000000000", 2))
-            randomInitialRow(100), 8
+            randomInitialRow(100), ruleSet(73890560L)
         );
         ag.propagate(100);
         PrintStream ps = new PrintStream(
@@ -25,11 +23,11 @@ public class AutomataGrid {
     }
 
     // give rules that result in a black square below
-    public AutomataGrid(Collection<Integer> initialRow, long ruleNumber) {
-        blackSquares = new HashSet<>();
-        blackRules = new HashSet<>();
-        for (Point5D rule : ruleSet(ruleNumber)) {
-            blackRules.add(rule);
+    public AutomataGrid(Collection<Integer> initialRow, Collection<Point5D> blackRules) {
+        this.blackSquares = new HashSet<>();
+        this.blackRules = new HashSet<>();
+        for (Point5D rule : blackRules) {
+            this.blackRules.add(rule);
         }
         for (int i : initialRow) {
             halfWidth = Math.max(halfWidth, Math.abs(i));
@@ -105,22 +103,23 @@ public class AutomataGrid {
     private static Collection<Point5D> ruleSet(long n) {
         Set<Point5D> rules = new HashSet<>();
         String binaryString = Long.toBinaryString(n);
-        int[] binary = new int[32];
-        int b = 31;
+        int b = 0;
         for (int i = binaryString.length() - 1; i >= 0; i--) {
-            binary[b] = Character.getNumericValue(binaryString.charAt(i));
-            b--;
-        }
-        for (int i = 0; i < binary.length; i++) {
-            if (binary[i] == 1) {
-                rules.add(binaryPoint(i));
+            int bit = Character.getNumericValue(binaryString.charAt(i));
+            if (bit == 1) {
+                rules.add(binaryPoint(b));
             }
+            b++;
         }
         return rules;
     }
 
     private static Collection<Integer> randomInitialRow(int halfWidth) {
         Set<Integer> ints = new HashSet<>();
+        if (halfWidth == 0) {
+            ints.add(0);
+            return ints;
+        }
         Random r = new Random();
         for (int h = -halfWidth; h <= halfWidth; h++) {
             if (r.nextInt(2) == 1) {

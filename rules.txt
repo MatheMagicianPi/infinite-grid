@@ -1,4 +1,0 @@
-875800 - terminate
-123456789 - right triangle convergence
-987654321 single - triangles
-563896698 - single - striped
