@@ -28,6 +28,13 @@ public class Point2D {
         if (other == null || getClass() != other.getClass()) {
             return false;
         }
+        Point2D otherPoint = (Point2D) other;
+        if (
+            x != otherPoint.x ||
+            y != otherPoint.y
+        ) {
+            return false;
+        }
         return true;
     }
 }

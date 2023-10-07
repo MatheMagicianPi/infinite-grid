@@ -3,6 +3,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class AutomataGrid {
@@ -11,12 +12,23 @@ public class AutomataGrid {
     private int halfWidth;
     private int height;
 
+    public static void main(String[] args) throws Exception {
+        AutomataGrid ag = new AutomataGrid(
+            // randomInitialRow(100), (long) (Integer.parseInt("0010000000000000000000000000000", 2))
+            randomInitialRow(100), 8
+        );
+        ag.propagate(100);
+        PrintStream ps = new PrintStream(
+            new File("C:\\Users\\dang8\\github_repos\\infinite-grid\\automata_grid_output.txt")
+        );
+        ps.print(ag);
+    }
+
     // give rules that result in a black square below
-    public AutomataGrid(Collection<Integer> initialRow,
-                        Collection<Point5D> statesForNextBlack) {
+    public AutomataGrid(Collection<Integer> initialRow, long ruleNumber) {
         blackSquares = new HashSet<>();
         blackRules = new HashSet<>();
-        for (Point5D rule : statesForNextBlack) {
+        for (Point5D rule : ruleSet(ruleNumber)) {
             blackRules.add(rule);
         }
         for (int i : initialRow) {
@@ -69,9 +81,9 @@ public class AutomataGrid {
             for (int w = -(halfWidth + 5); w <= halfWidth + 5; w++) {
                     int r = getCell(w, h);
                     if (r == 0) {
-                        sb.append("[ ]");
+                        sb.append(" ");
                     } else {
-                        sb.append("[=]");
+                        sb.append("#");
                     }
                 }
             sb.append("\n");
@@ -79,27 +91,42 @@ public class AutomataGrid {
         return sb.toString();
     }
 
-    public static void main(String[] args) throws Exception {
-        AutomataGrid ag = new AutomataGrid(
-            List.of(0, 1, 3, 5, 6, 7, 10, 12),
-            List.of(
-                new Point5D(1, 1, 0, 0, 0),
-                new Point5D(0, 1, 1, 0, 0),
-                new Point5D(0, 1, 0, 1, 0),
-                new Point5D(1, 1, 0, 1, 0),
-                new Point5D(0, 1, 1, 0, 1),
-                new Point5D(0, 0, 0, 1, 0),
-                new Point5D(0, 0, 0, 1, 1),
-                new Point5D(0, 0, 1, 0, 1),
-                new Point5D(0, 0, 1, 1, 0),
-                new Point5D(1, 1, 1, 1, 0),
-                new Point5D(1, 1, 1, 0, 1),
-                new Point5D(1, 0, 1, 1, 0)
-        ));
-        ag.propagate(10);
-        PrintStream ps = new PrintStream(
-            new File("C:\\Users\\dang8\\github_repos\\infinite-grid\\automata_grid_output.txt")
-        );
-        ps.print(ag);
+    private static Point5D binaryPoint(int n) {
+        String binaryString = Integer.toBinaryString(n);
+        int[] binary = new int[5];
+        int b = 4;
+        for (int i = binaryString.length() - 1; i >= 0; i--) {
+            binary[b] = Character.getNumericValue(binaryString.charAt(i));
+            b--;
+        }
+        return new Point5D(binary[0], binary[1], binary[2], binary[3], binary[4]);
+    }
+
+    private static Collection<Point5D> ruleSet(long n) {
+        Set<Point5D> rules = new HashSet<>();
+        String binaryString = Long.toBinaryString(n);
+        int[] binary = new int[32];
+        int b = 31;
+        for (int i = binaryString.length() - 1; i >= 0; i--) {
+            binary[b] = Character.getNumericValue(binaryString.charAt(i));
+            b--;
+        }
+        for (int i = 0; i < binary.length; i++) {
+            if (binary[i] == 1) {
+                rules.add(binaryPoint(i));
+            }
+        }
+        return rules;
+    }
+
+    private static Collection<Integer> randomInitialRow(int halfWidth) {
+        Set<Integer> ints = new HashSet<>();
+        Random r = new Random();
+        for (int h = -halfWidth; h <= halfWidth; h++) {
+            if (r.nextInt(2) == 1) {
+                ints.add(h);
+            }
+        }
+        return ints;
     }
 }

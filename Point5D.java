@@ -15,6 +15,17 @@ public class Point5D {
         this.v = v;
     }
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(").append(x).append(", ")
+                        .append(y).append(", ")
+                        .append(z).append(", ")
+                        .append(u).append(", ")
+                        .append(v)
+            .append(")");
+        return sb.toString();
+    }
+
     public int hashCode() {
         return Objects.hash(x, y, z, u, v);
     }
@@ -24,6 +35,16 @@ public class Point5D {
             return true;
         }
         if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        Point5D otherPoint = (Point5D) other;
+        if (
+            x != otherPoint.x ||
+            y != otherPoint.y ||
+            z != otherPoint.z ||
+            u != otherPoint.u ||
+            v != otherPoint.v
+        ) {
             return false;
         }
         return true;
