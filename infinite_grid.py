@@ -20,8 +20,10 @@ pygame.display.set_caption("Infinite 2D Grid")
 # Initialize the grid with random colors
 grid_width = SCREEN_WIDTH // CELL_SIZE
 grid_height = SCREEN_HEIGHT // CELL_SIZE
-grid = np.random.choice([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], (grid_height, grid_width))
+grid = np.random.choice([1], (grid_height, grid_width))
 new_grid = np.zeros((grid_height, grid_width))
+r = 0.5
+m = 0.2
 
 # grid[0][0] = 1
 # grid[0][1] = 1
@@ -71,20 +73,11 @@ while running:
             cell = grid[row][col]
             neighbors = adjacent_neighbors((row, col))
             live = len(neighbors[1])
-            if cell == 1:
-                if live == 0:
-                    new_grid[row][col] = 0
-                else:
-                    new_grid[row][col] = 1
-            else:
-                if live >= 3:
-                    new_grid[row][col] = 1
-                elif live == 1 and random.uniform(0, 1) <= 0.01:
-                    new_grid[row][col] = 1
-                elif live == 2 and random.uniform(0, 1) <= 0.1:
-                    new_grid[row][col] = 1
-                else:
-                    new_grid[row][col] = 0
+            new_grid[row][col] = cell
+            if cell == 0 and live >= 2 and random.uniform(0, 1) <= r:
+                new_grid[row][col] = 1
+            elif cell == 1 and random.uniform(0, 1) <= m:
+                new_grid[row][col] = 0
 
     # Draw the grid
     for row in range(grid_height):
