@@ -15,7 +15,7 @@ COLORS = {
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Infinite 2D Grid")
+pygame.display.set_caption("Growth Model")
 
 # Initialize the grid with random colors
 grid_width = SCREEN_WIDTH // CELL_SIZE
