@@ -8,15 +8,15 @@ pygame.init()
 # Constants
 CELL_SIZE = 20  # Size of each cell in pixels
 GRID_WIDTH = 200  # Number of cells in the horizontal direction
-GRID_HEIGHT = 200  # Number of cells in the vertical direction
+GRID_HEIGHT = 500  # Number of cells in the vertical direction
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
 ZOOM_FACTOR = 1.2  # Zoom in/out factor
 PAN_SPEED = 5
 # RULE_NUMBER = random.randint(0, 2**32 - 1)
-RULE_NUMBER = 825818938
+RULE_NUMBER = 2202350827
 RANDOM_NUMBER = False
-RANDOM_START = True
+RANDOM_START = False
 # Triangles: 2**31 + 1
 # Order to Chaos: 2420521844
 # Chaos to Order: 2515161969

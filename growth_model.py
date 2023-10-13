@@ -4,8 +4,8 @@ import numpy as np
 import time
 
 # Define constants
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 600
+GRID_WIDTH = 128
+GRID_HEIGHT = 72
 CELL_SIZE = 10  # Size of each cell
 COLORS = {
     0: (255, 255, 255),
@@ -14,20 +14,15 @@ COLORS = {
 
 # Initialize Pygame
 pygame.init()
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE))
 pygame.display.set_caption("Growth Model")
 
 # Initialize the grid with random colors
-grid_width = SCREEN_WIDTH // CELL_SIZE
-grid_height = SCREEN_HEIGHT // CELL_SIZE
-grid = np.random.choice([1], (grid_height, grid_width))
-new_grid = np.zeros((grid_height, grid_width))
-r = 0.5
-m = 0.2
 
-# grid[0][0] = 1
-# grid[0][1] = 1
-# grid[1][0] = 1
+grid = np.random.choice([0, 0, 0, 0, 1], (GRID_HEIGHT, GRID_WIDTH))
+new_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH))
+r = 0.3
+m = 0.1
 
 def adjacent_neighbors(coords):
     neighbors = dict()
@@ -42,7 +37,7 @@ def adjacent_neighbors(coords):
         neighbors[(row - 1, col)] = grid[row - 1][col]
         neighbors[grid[row - 1][col]].append((row - 1, col))
 
-    if row == grid_height - 1:
+    if row == GRID_HEIGHT - 1:
         neighbors[(row + 1, col)] = None
     else:
         neighbors[(row + 1, col)] = grid[row + 1][col]
@@ -54,7 +49,7 @@ def adjacent_neighbors(coords):
         neighbors[(row, col - 1)] = grid[row, col - 1]
         neighbors[grid[row][col - 1]].append((row, col - 1))
 
-    if col == grid_width - 1:
+    if col == GRID_WIDTH - 1:
         neighbors[(row, col + 1)] = None
     else:
         neighbors[(row, col + 1)] = grid[row, col + 1]
@@ -68,8 +63,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    for row in range(grid_height):
-        for col in range(grid_width):
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
             cell = grid[row][col]
             neighbors = adjacent_neighbors((row, col))
             live = len(neighbors[1])
@@ -80,8 +75,8 @@ while running:
                 new_grid[row][col] = 0
 
     # Draw the grid
-    for row in range(grid_height):
-        for col in range(grid_width):
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
             pygame.draw.rect(screen, COLORS[new_grid[row][col]], (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
     pygame.display.flip()
