@@ -823,7 +823,7 @@ def count_occurrences(input_list):
 
     return sorted_dict
 
-# data = generate_random_numbers(-36.143, 31.24, 1000)
+data = generate_random_numbers(-36.143, 31.24, 1000)
 # data = generate_random_numbers(-0.2, 0.2, 1000)
 
 changes = []
@@ -848,9 +848,13 @@ SCREEN_HEIGHT = 600
 ZOOM_FACTOR = 1.2  # Zoom in/out factor
 PAN_SPEED = 5
 # RULE_NUMBER = random.randint(0, 2**32 - 1)
-RULE_NUMBER = 3390614688
+RULE_NUMBER = 545799158
 RANDOM_NUMBER = False
-EXPLICIT_RULES = True
+EXPLICIT_RULES = False
+
+# drips: 476016354
+# visual density: 1405961252
+# pyramids: 545799158
 
 # Colors
 BLACK = (0, 0, 0)
@@ -882,7 +886,7 @@ rules = {
     (0, 0, 0, 0, 1): 0,
     (0, 0, 0, 1, 0): 0,
     (0, 0, 0, 1, 1): 0,
-    (0, 0, 1, 0, 0): 1,
+    (0, 0, 1, 0, 0): 0,
     (0, 0, 1, 0, 1): 0,
     (0, 0, 1, 1, 0): 0,
     (0, 0, 1, 1, 1): 0,
@@ -933,6 +937,13 @@ while running:
                     rule_number = int_to_binary_tuple(RULE_NUMBER)
                     for tuple_ in rules.keys():
                         rules[tuple_] = rule_number[tuple_to_binary_int(tuple_)]
+
+                grid = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+                keys = tuple(changes_counts.keys())
+                for i in range(len(keys)):
+                    for j in range(changes_counts[keys[i]]):
+                        grid[j][i] = 1
+
                 for row in range(1, GRID_HEIGHT):
                     for col in range(GRID_WIDTH):
                         if grid[row][col] == 0:
