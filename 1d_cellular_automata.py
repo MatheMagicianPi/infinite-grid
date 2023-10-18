@@ -14,9 +14,9 @@ SCREEN_HEIGHT = 600
 ZOOM_FACTOR = 1.2  # Zoom in/out factor
 PAN_SPEED = 5
 # RULE_NUMBER = random.randint(0, 2**32 - 1)
-RULE_NUMBER = 2202350827
+RULE_NUMBER = 2168621355
 RANDOM_NUMBER = False
-RANDOM_START = False
+RANDOM_START = True
 # Triangles: 2**31 + 1
 # Order to Chaos: 2420521844
 # Chaos to Order: 2515161969
