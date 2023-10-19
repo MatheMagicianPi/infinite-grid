@@ -9,8 +9,8 @@ pygame.init()
 
 # Constants
 CELL_SIZE = 20  # Size of each cell in pixels
-GRID_WIDTH = 150  # Number of cells in the horizontal direction
-GRID_HEIGHT = 150  # Number of cells in the vertical direction
+GRID_WIDTH = 100  # Number of cells in the horizontal direction
+GRID_HEIGHT = 50  # Number of cells in the vertical direction
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
 ZOOM_FACTOR = 1.2  # Zoom in/out factor
@@ -71,7 +71,7 @@ def get_neighbors(row, col):
     neighbors = []
     for i in range(row - 1, row + 2):
         for j in range(col - 1, col + 2):
-            if 0 <= i < GRID_WIDTH and 0 <= j < GRID_HEIGHT:
+            if 0 <= i < GRID_HEIGHT and 0 <= j < GRID_WIDTH:
                 neighbors.append(grid[i][j])
     return neighbors
 
