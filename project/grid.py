@@ -1,3 +1,4 @@
+import copy
 import pygame
 import sys
 import random
@@ -9,63 +10,77 @@ pygame.init()
 
 # Constants
 CELL_SIZE = 20  # Size of each cell in pixels
-GRID_WIDTH = 100  # Number of cells in the horizontal direction
-GRID_HEIGHT = 50  # Number of cells in the vertical direction
+GRID_WIDTH = 50  # Number of cells in the horizontal direction
+GRID_HEIGHT = 2 * GRID_WIDTH + 1  # Number of cells in the vertical direction
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
 ZOOM_FACTOR = 1.2  # Zoom in/out factor
 PAN_SPEED = 5
+ROUNDING = None
+
+EXCLUDED_COLORS = (-1, -1)
+REBELS = True
+REBEL_RATE = 10**-4
 
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-YELLOW = (255, 218, 40)
-PINK = (255, 133, 164)
-GREEN = (142, 237, 101)
-BLUE = (0, 0, 255)
-PURPLE = (186, 85, 211)
-CYAN = (0, 255, 255)
-ORANGE = (255, 165, 0)
-RED = (255, 0, 0)
-LIME_GREEN = (50, 205, 50)
-TURQUOISE = (64, 224, 208)
-GOLD = (255, 215, 0)
-TEAL = (0, 128, 128)
-MAGENTA = (255, 0, 255)
-SLATE_GRAY = (112, 128, 144)
-OLIVE = (128, 128, 0)
+RED = (255, 130, 71)
+ORANGE = (255, 182, 83)
+YELLOW = (255, 220, 102)
+GREEN = (136, 255, 147)
+BLUE = (100, 149, 237)
+PURPLE = (171, 130, 255)
 
 COLORS = {
     -1: BLACK,
     0: WHITE,
-    1: YELLOW,
-    2: PINK,
-    3: GREEN,
-    4: BLUE,
-    5: PURPLE,
-    6: CYAN,
-    7: ORANGE,
-    8: RED,
-    9: LIME_GREEN,
-    10: TURQUOISE,
-    11: GOLD,
-    12: TEAL,
-    13: MAGENTA,
-    14: SLATE_GRAY,
-    15: OLIVE
+    1: RED,
+    2: ORANGE,
+    3: YELLOW,
+    4: GREEN,
+    5: BLUE,
+    6: PURPLE
 }
 
+def random_color():
+    return random.randint(1, len(COLORS) - 2)
+    # return random.randint(1, 5)
 
 # Create the Pygame window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Name of Window")
+pygame.display.set_caption("War")
 
-grid = [[random.randint(1, len(COLORS) - 2) for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
-new_grid = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+grid = [[random_color() for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+for i in range(GRID_WIDTH):
+    grid[round(GRID_HEIGHT / 2)][i] = -1
+new_grid = copy.deepcopy(grid)
 
 # Initialize zoom and pan variables
 zoom = 0.5
 pan_x, pan_y = 0, 0
+steps = 0
+open = False
+
+def step(s):
+    global grid
+    global new_grid
+    for _ in range(s):
+        for row in range(GRID_HEIGHT):
+            for col in range(GRID_WIDTH):
+                if grid[row][col] in EXCLUDED_COLORS:
+                    pass
+                    # random rebels
+                elif REBELS and random.uniform(0, 1) <= REBEL_RATE:
+                    new_grid[row][col] = random_color()
+                else:
+                    # neighbor domination
+                    neighbors = get_neighbors(row, col)
+                    n = random.choice(neighbors)
+                    if n not in EXCLUDED_COLORS and n != 0:
+                        new_grid[row][col] = n
+
+    grid = new_grid
 
 def get_neighbors(row, col):
     neighbors = []
@@ -88,21 +103,13 @@ while running:
                 zoom *= ZOOM_FACTOR
             elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:  # Handle both '-' and 'numpad -'
                 zoom /= ZOOM_FACTOR
-
-    for row in range(GRID_HEIGHT):
-        for col in range(GRID_WIDTH):
-                # random rebels
-            if random.uniform(0, 1) <= 10**-4:
-                new_grid[row][col] = random.randint(1, len(COLORS) - 2)
-            else:
-                # neighbor domination
-                # new_grid[row][col] = random.choice(get_neighbors(row, col))
-                neighbors = get_neighbors(row, col)
-                n = random.choice(neighbors)
-                if n != 0:
-                    new_grid[row][col] = n
-
-    grid = new_grid
+            if event.key == pygame.K_SPACE:
+                open = not open
+                if open:
+                    grid[round(GRID_HEIGHT / 2)][round(GRID_WIDTH / 2)] = 0
+                else:
+                    for i in range(GRID_WIDTH):
+                        grid[round(GRID_HEIGHT / 2)][i] = -1
 
     # Handle panning with arrow keys
     keys = pygame.key.get_pressed()
@@ -115,6 +122,8 @@ while running:
     if keys[pygame.K_DOWN]:
         pan_y -= PAN_SPEED / zoom
 
+    step(10)
+
     # Clear the screen
     screen.fill(BLACK)
 
@@ -123,7 +132,10 @@ while running:
         for x in range(GRID_WIDTH):
             cell_color = COLORS[grid[y][x]]
             cell_rect = pygame.Rect(
-                x * CELL_SIZE * zoom + pan_x, y * CELL_SIZE * zoom + pan_y, CELL_SIZE * zoom, CELL_SIZE * zoom
+                round(x * CELL_SIZE * zoom + pan_x, ROUNDING),
+                round(y * CELL_SIZE * zoom + pan_y, ROUNDING),
+                round(CELL_SIZE * zoom, ROUNDING),
+                round(CELL_SIZE * zoom, ROUNDING)
             )
             pygame.draw.rect(screen, cell_color, cell_rect)
 
