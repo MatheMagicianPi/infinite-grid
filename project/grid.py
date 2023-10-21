@@ -19,8 +19,10 @@ PAN_SPEED = 5
 ROUNDING = None
 
 EXCLUDED_COLORS = (-1, -1)
-REBELS = True
+REBELS_ENABLED = False
 REBEL_RATE = 10**-4
+COOLDOWN_ENABLED = False
+COOLDOWN_STEPS = 50
 
 # Colors
 BLACK = (0, 0, 0)
@@ -43,6 +45,9 @@ COLORS = {
     6: PURPLE
 }
 
+cells_on_cooldown = dict()
+open = False
+
 def random_color():
     return random.randint(1, len(COLORS) - 2)
     # return random.randint(1, 5)
@@ -60,7 +65,6 @@ new_grid = copy.deepcopy(grid)
 zoom = 0.5
 pan_x, pan_y = 0, 0
 steps = 0
-open = False
 
 def step(s):
     global grid
@@ -70,15 +74,22 @@ def step(s):
             for col in range(GRID_WIDTH):
                 if grid[row][col] in EXCLUDED_COLORS:
                     pass
+                elif COOLDOWN_ENABLED and (row, col) in cells_on_cooldown:
+                    cells_on_cooldown[(row, col)] -= 1
+                    if cells_on_cooldown[(row, col)] == 0:
+                        del cells_on_cooldown[(row, col)]
                     # random rebels
-                elif REBELS and random.uniform(0, 1) <= REBEL_RATE:
+                elif REBELS_ENABLED and random.uniform(0, 1) <= REBEL_RATE:
                     new_grid[row][col] = random_color()
                 else:
                     # neighbor domination
                     neighbors = get_neighbors(row, col)
                     n = random.choice(neighbors)
+                    old_state = grid[row][col]
                     if n not in EXCLUDED_COLORS and n != 0:
                         new_grid[row][col] = n
+                        if n != old_state:
+                            cells_on_cooldown[(row, col)] = random.randint(1, COOLDOWN_STEPS)
 
     grid = new_grid
 
@@ -110,6 +121,11 @@ while running:
                 else:
                     for i in range(GRID_WIDTH):
                         grid[round(GRID_HEIGHT / 2)][i] = -1
+            if event.key == pygame.K_c:
+                COOLDOWN_ENABLED = not COOLDOWN_ENABLED
+                cells_on_cooldown.clear()
+            if event.key == pygame.K_r:
+                REBELS_ENABLED = not REBELS_ENABLED
 
     # Handle panning with arrow keys
     keys = pygame.key.get_pressed()
@@ -122,7 +138,7 @@ while running:
     if keys[pygame.K_DOWN]:
         pan_y -= PAN_SPEED / zoom
 
-    step(10)
+    step(1)
 
     # Clear the screen
     screen.fill(BLACK)
