@@ -10,8 +10,8 @@ pygame.init()
 
 # Constants
 CELL_SIZE = 20  # Size of each cell in pixels
-GRID_WIDTH = 50  # Number of cells in the horizontal direction
-GRID_HEIGHT = 2 * GRID_WIDTH + 1  # Number of cells in the vertical direction
+GRID_WIDTH = 100  # Number of cells in the horizontal direction
+GRID_HEIGHT = 100  # Number of cells in the vertical direction
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 600
 ZOOM_FACTOR = 1.2  # Zoom in/out factor
@@ -19,10 +19,7 @@ PAN_SPEED = 5
 ROUNDING = None
 
 EXCLUDED_COLORS = (-1, -1)
-REBELS_ENABLED = False
-REBEL_RATE = 10**-4
-COOLDOWN_ENABLED = False
-COOLDOWN_STEPS = 50
+STRENGTH_IN_NUMBERS = 50
 
 # Colors
 BLACK = (0, 0, 0)
@@ -45,20 +42,34 @@ COLORS = {
     6: PURPLE
 }
 
-cells_on_cooldown = dict()
-open = False
+ENEMIES = set()
 
 def random_color():
     return random.randint(1, len(COLORS) - 2)
     # return random.randint(1, 5)
+
+def choose_next_state(neighbors):
+    if len(set(neighbors)) == 1:
+        return neighbors[0]
+    return random.choice(neighbors)
+
+def most_common_elements(input_list):
+    # Use Counter to count element occurrences
+    count = Counter(input_list)
+    
+    # Find the maximum count
+    max_count = max(count.values())
+    
+    # Create a list of elements with the maximum count
+    most_common = [item for item, freq in count.items() if freq == max_count]
+    
+    return most_common
 
 # Create the Pygame window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("War")
 
 grid = [[random_color() for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
-for i in range(GRID_WIDTH):
-    grid[round(GRID_HEIGHT / 2)][i] = -1
 new_grid = copy.deepcopy(grid)
 
 # Initialize zoom and pan variables
@@ -74,23 +85,12 @@ def step(s):
             for col in range(GRID_WIDTH):
                 if grid[row][col] in EXCLUDED_COLORS:
                     pass
-                elif COOLDOWN_ENABLED and (row, col) in cells_on_cooldown:
-                    cells_on_cooldown[(row, col)] -= 1
-                    if cells_on_cooldown[(row, col)] == 0:
-                        del cells_on_cooldown[(row, col)]
-                    # random rebels
-                elif REBELS_ENABLED and random.uniform(0, 1) <= REBEL_RATE:
-                    new_grid[row][col] = random_color()
                 else:
                     # neighbor domination
                     neighbors = get_neighbors(row, col)
-                    n = random.choice(neighbors)
-                    old_state = grid[row][col]
-                    if n not in EXCLUDED_COLORS and n != 0:
+                    n = choose_next_state(neighbors)
+                    if n != 0:
                         new_grid[row][col] = n
-                        if n != old_state:
-                            cells_on_cooldown[(row, col)] = random.randint(1, COOLDOWN_STEPS)
-
     grid = new_grid
 
 def get_neighbors(row, col):
@@ -99,6 +99,9 @@ def get_neighbors(row, col):
         for j in range(col - 1, col + 2):
             if 0 <= i < GRID_HEIGHT and 0 <= j < GRID_WIDTH:
                 neighbors.append(grid[i][j])
+    crowd_bias = random.choice(most_common_elements(neighbors))
+    for i in range(STRENGTH_IN_NUMBERS):
+        neighbors.append(crowd_bias)
     return neighbors
 
 # Main loop
@@ -114,16 +117,6 @@ while running:
                 zoom *= ZOOM_FACTOR
             elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:  # Handle both '-' and 'numpad -'
                 zoom /= ZOOM_FACTOR
-            if event.key == pygame.K_SPACE:
-                open = not open
-                if open:
-                    grid[round(GRID_HEIGHT / 2)][round(GRID_WIDTH / 2)] = 0
-                else:
-                    for i in range(GRID_WIDTH):
-                        grid[round(GRID_HEIGHT / 2)][i] = -1
-            if event.key == pygame.K_c:
-                COOLDOWN_ENABLED = not COOLDOWN_ENABLED
-                cells_on_cooldown.clear()
             if event.key == pygame.K_r:
                 REBELS_ENABLED = not REBELS_ENABLED
 
