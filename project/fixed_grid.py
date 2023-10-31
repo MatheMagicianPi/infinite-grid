@@ -11,9 +11,9 @@ GRID_HEIGHT = 60
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
 
-STRENGTH_IN_NUMBERS = 3
+STRENGTH_IN_NUMBERS = 0
 
-REBELLION_PROBABILITY = 0.01
+REBELLION_PROBABILITY = -1
 REBELLION_SUCCESS_RATE = 0.5
 
 # Colors
@@ -83,8 +83,15 @@ pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Create a random grid of 0s and 1s
-grid = [[random.randint(1, len(COLORS) - 2) for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+grid = [[random.randint(1, 19) for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
 new_grid = copy.deepcopy(grid)
+
+def swap_grids():
+    global grid
+    global new_grid
+    temp = grid
+    grid = new_grid
+    new_grid = temp
 
 def draw_grid(first_time):
     for row in range(GRID_HEIGHT):
@@ -95,19 +102,17 @@ def draw_grid(first_time):
                 cell_rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(screen, cell_color, cell_rect)
 
-def step(s):
-    global grid
+def step():
     global new_grid
     colors_remaining.clear()
-    for _ in range(s):
-        for row in range(GRID_HEIGHT):
-            for col in range(GRID_WIDTH):
-                # neighbor domination
-                neighbors = get_neighbors(row, col)
-                n = choose_next_state(neighbors)
-                if n != 0:
-                    new_grid[row][col] = n
-                    colors_remaining.add(n)
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            # neighbor domination
+            neighbors = get_neighbors(row, col)
+            n = choose_next_state(neighbors)
+            if n != 0:
+                new_grid[row][col] = n
+                colors_remaining.add(n)
 
 def get_neighbors(row, col):
     neighbors = []
@@ -127,6 +132,14 @@ def rebellion(rebel_color, against_color, success_rate):
                 if new_grid[row][col] == against_color and random.uniform(0, 1) <= success_rate:
                     new_grid[row][col] = rebel_color
 
+def attempt_rebellion():
+    if random.uniform(0, 1) <= REBELLION_PROBABILITY:
+        against_color = random.choice(list(colors_remaining))
+        rebel_color = random.choice(list(COLORS.keys()))
+        while (rebel_color == against_color):
+            rebel_color = random.choice(list(COLORS.keys()))
+        rebellion(rebel_color, against_color, REBELLION_SUCCESS_RATE)
+
 draw_grid(True)
 pygame.display.flip()
 running = True
@@ -134,17 +147,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    step(1)
-    if random.uniform(0, 1) <= REBELLION_PROBABILITY:
-        against_color = random.choice(list(colors_remaining))
-        rebel_color = random.choice(list(COLORS.keys()))
-        while (rebel_color == against_color):
-            rebel_color = random.choice(list(COLORS.keys()))
-        rebellion(rebel_color, against_color, REBELLION_SUCCESS_RATE)
+    step()
+    attempt_rebellion()
     draw_grid(False)
-    temp = grid
-    grid = new_grid
-    new_grid = temp
+    swap_grids()
     pygame.display.flip()
 
 # Quit Pygame
