@@ -3,17 +3,17 @@ import pygame
 import sys
 import random
 from collections import Counter
+import time
 
 # Constants
-CELL_SIZE = 10
-GRID_WIDTH = 120
-GRID_HEIGHT = 60
+CELL_SIZE = 100; GRID_WIDTH = 3; GRID_HEIGHT = 3
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
 
-STRENGTH_IN_NUMBERS = 0
+COUNTDOWN = 0.5
+STRENGTH_IN_NUMBERS = 10
 
-REBELLION_PROBABILITY = -1
+REBELLION_PROBABILITY = 0.5
 REBELLION_SUCCESS_RATE = 0.5
 
 # Colors
@@ -61,9 +61,14 @@ COLORS = {
 
 colors_remaining = set()
 
+def initial_state():
+    # return random.randint(1, 19)
+    return random.choice((5, 7, 9))
+
 def choose_next_state(neighbors):
-    if len(set(neighbors)) == 1:
-        return neighbors[0]
+    crowd_bias = random.choice(most_common_elements(neighbors))
+    if random.randint(1, 9 + STRENGTH_IN_NUMBERS) >= 10:
+        return crowd_bias
     return random.choice(neighbors)
 
 def most_common_elements(input_list):
@@ -83,7 +88,7 @@ pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Create a random grid of 0s and 1s
-grid = [[random.randint(1, 19) for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+grid = [[initial_state() for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
 new_grid = copy.deepcopy(grid)
 
 def swap_grids():
@@ -120,9 +125,6 @@ def get_neighbors(row, col):
         for j in range(col - 1, col + 2):
             if 0 <= i < GRID_HEIGHT and 0 <= j < GRID_WIDTH:
                 neighbors.append(grid[i][j])
-    crowd_bias = random.choice(most_common_elements(neighbors))
-    for i in range(STRENGTH_IN_NUMBERS):
-        neighbors.append(crowd_bias)
     return neighbors
 
 def rebellion(rebel_color, against_color, success_rate):
@@ -144,6 +146,7 @@ draw_grid(True)
 pygame.display.flip()
 running = True
 while running:
+    time.sleep(COUNTDOWN)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -152,7 +155,7 @@ while running:
     draw_grid(False)
     swap_grids()
     pygame.display.flip()
-
+    
 # Quit Pygame
 pygame.quit()
 sys.exit()
