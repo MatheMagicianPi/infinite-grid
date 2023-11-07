@@ -6,14 +6,16 @@ from collections import Counter
 import time
 
 # Constants
-CELL_SIZE = 100; GRID_WIDTH = 3; GRID_HEIGHT = 3
+CELL_SIZE = 20; GRID_HEIGHT = 30; GRID_WIDTH = 2 * GRID_HEIGHT
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
 
-COUNTDOWN = 0.5
-STRENGTH_IN_NUMBERS = 0
+NEIGHBORHOOD_RADIUS = 1
 
-REBELLION_PROBABILITY = 0.5
+COUNTDOWN = 0
+STRENGTH_IN_NUMBERS = 10
+
+REBELLION_PROBABILITY = -1
 REBELLION_SUCCESS_RATE = 0.5
 
 # Colors
@@ -60,14 +62,22 @@ COLORS = {
 }
 
 colors_remaining = set()
+winning_teams = Counter()
+rounds_played = 1
 
-def initial_state():
+def initial_state(row, col):
     # return random.randint(1, 19)
-    return random.choice((5, 7, 9))
+    # return random.choices((5, 7, 9), [1/3 + 2/50, 1/3 - 1/50, 1/3 - 1/50], k=1)[0]
+    if col < GRID_WIDTH / 3:
+        return 5
+    if GRID_WIDTH / 3 <= col <= 2 * GRID_WIDTH / 3:
+        return 7
+    if 2 * GRID_WIDTH / 3 < col:
+        return 9
 
 def choose_next_state(neighbors):
     crowd_bias = random.choice(most_common_elements(neighbors))
-    if random.randint(1, 9 + STRENGTH_IN_NUMBERS) >= 10:
+    if random.randint(1, (2 * NEIGHBORHOOD_RADIUS + 1)**2 + STRENGTH_IN_NUMBERS) >= (2 * NEIGHBORHOOD_RADIUS + 1)**2 + 1:
         return crowd_bias
     return random.choice(neighbors)
 
@@ -88,7 +98,7 @@ pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Create a random grid of 0s and 1s
-grid = [[initial_state() for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
 new_grid = copy.deepcopy(grid)
 
 def swap_grids():
@@ -121,8 +131,8 @@ def step():
 
 def get_neighbors(row, col):
     neighbors = []
-    for i in range(row - 1, row + 2):
-        for j in range(col - 1, col + 2):
+    for i in range(row - NEIGHBORHOOD_RADIUS, row + NEIGHBORHOOD_RADIUS + 1):
+        for j in range(col - NEIGHBORHOOD_RADIUS, col + NEIGHBORHOOD_RADIUS + 1):
             if 0 <= i < GRID_HEIGHT and 0 <= j < GRID_WIDTH:
                 neighbors.append(grid[i][j])
     return neighbors
@@ -155,7 +165,17 @@ while running:
     draw_grid(False)
     swap_grids()
     pygame.display.flip()
+
+    if len(colors_remaining) == 1:
+        grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
+        new_grid = copy.deepcopy(grid)
+        draw_grid(True)
+        pygame.display.flip()
+        winning_teams.update(tuple(colors_remaining))
+        rounds_played += 1
     
+print(winning_teams)
+
 # Quit Pygame
 pygame.quit()
 sys.exit()
