@@ -6,14 +6,17 @@ from collections import Counter
 import time
 
 # Constants
-CELL_SIZE = 20; GRID_HEIGHT = 30; GRID_WIDTH = 2 * GRID_HEIGHT
+CELL_SIZE = 20; GRID_HEIGHT = 5; GRID_WIDTH = 2 * GRID_HEIGHT
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
+
+DISPLAY = False
+SAMPLE_SIZE = 900
 
 NEIGHBORHOOD_RADIUS = 1
 
 COUNTDOWN = 0
-STRENGTH_IN_NUMBERS = 10
+STRENGTH_IN_NUMBERS = 5
 
 REBELLION_PROBABILITY = -1
 REBELLION_SUCCESS_RATE = 0.5
@@ -67,13 +70,13 @@ rounds_played = 1
 
 def initial_state(row, col):
     # return random.randint(1, 19)
-    # return random.choices((5, 7, 9), [1/3 + 2/50, 1/3 - 1/50, 1/3 - 1/50], k=1)[0]
-    if col < GRID_WIDTH / 3:
-        return 5
-    if GRID_WIDTH / 3 <= col <= 2 * GRID_WIDTH / 3:
-        return 7
-    if 2 * GRID_WIDTH / 3 < col:
-        return 9
+    return random.choices((5, 7, 9), [1/2, 1/4, 1/4], k=1)[0]
+    # if col < GRID_WIDTH / 3:
+    #     return 5
+    # if GRID_WIDTH / 3 <= col <= 2 * GRID_WIDTH / 3:
+    #     return 7
+    # if 2 * GRID_WIDTH / 3 < col:
+    #     return 9
 
 def choose_next_state(neighbors):
     crowd_bias = random.choice(most_common_elements(neighbors))
@@ -152,8 +155,9 @@ def attempt_rebellion():
             rebel_color = random.choice(list(COLORS.keys()))
         rebellion(rebel_color, against_color, REBELLION_SUCCESS_RATE)
 
-draw_grid(True)
-pygame.display.flip()
+if DISPLAY:
+    draw_grid(True)
+    pygame.display.flip()
 running = True
 while running:
     time.sleep(COUNTDOWN)
@@ -162,16 +166,22 @@ while running:
             running = False
     step()
     attempt_rebellion()
-    draw_grid(False)
+    if DISPLAY:
+        draw_grid(False)
     swap_grids()
-    pygame.display.flip()
+    if DISPLAY:
+        pygame.display.flip()
 
     if len(colors_remaining) == 1:
         grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
         new_grid = copy.deepcopy(grid)
-        draw_grid(True)
-        pygame.display.flip()
+        if DISPLAY:
+            draw_grid(True)
+            pygame.display.flip()
         winning_teams.update(tuple(colors_remaining))
+        print(f"Round {rounds_played} complete")
+        if rounds_played >= SAMPLE_SIZE:
+            running = False
         rounds_played += 1
     
 print(winning_teams)
