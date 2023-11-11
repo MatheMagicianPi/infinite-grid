@@ -6,20 +6,15 @@ from collections import Counter
 import time
 
 # Constants
-CELL_SIZE = 10; GRID_HEIGHT = 30; GRID_WIDTH = 2 * GRID_HEIGHT
+CELL_SIZE = 10; GRID_HEIGHT = 21; GRID_WIDTH = 1 * GRID_HEIGHT
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
 
 DISPLAY = True
 SAMPLE_SIZE = 0
 
-NEIGHBORHOOD_RADIUS = 1
-
 COUNTDOWN = 0
-STRENGTH_IN_NUMBERS = 10
-
-# REBELLION_PROBABILITY = -1
-# REBELLION_SUCCESS_RATE = 0.5
+STRENGTH_IN_NUMBERS = 0
 
 # Colors
 BLACK = (0, 0, 0)
@@ -66,23 +61,35 @@ COLORS = {
     19: LIME
 }
 
+grid = None
+new_grid = None
+
 colors_remaining = set()
 winning_teams = Counter()
-rounds_played = 1
+rounds_played = 0
 
 def initial_state(row, col):
-    return random.randint(1, 19)
-    # return random.choices((5, 7, 9), [1/3, 1/3, 1/3], k=1)[0]
-    # if col < GRID_WIDTH / 3:
-    #     return 5
-    # if GRID_WIDTH / 3 <= col <= 2 * GRID_WIDTH / 3:
-    #     return 7
-    # if 2 * GRID_WIDTH / 3 < col:
-    #     return 9
+    # return random.randint(1, 3)
+    # return random.choices((1, 2, 3), [0.97, 0.02, 0.01], k=1)[0]
+    # return 1
+    if col < GRID_WIDTH / 3:
+        return 5
+    if GRID_WIDTH / 3 <= col <= 2 * GRID_WIDTH / 3:
+        return 7
+    if 2 * GRID_WIDTH / 3 < col:
+        return 9
+
+def create_grid():
+    global grid
+    global new_grid
+    grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
+    # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
+    # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
+    new_grid = copy.deepcopy(grid)
 
 def choose_next_state(neighbors):
     crowd_bias = random.choice(most_common_elements(neighbors))
-    if random.randint(1, (2 * NEIGHBORHOOD_RADIUS + 1)**2 + STRENGTH_IN_NUMBERS) >= (2 * NEIGHBORHOOD_RADIUS + 1)**2 + 1:
+    if random.randint(1, 9 + STRENGTH_IN_NUMBERS) >= 10:
         return crowd_bias
     return random.choice(neighbors)
 
@@ -102,10 +109,6 @@ def most_common_elements(input_list):
 pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-# Create a random grid of 0s and 1s
-grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
-new_grid = copy.deepcopy(grid)
-
 def swap_grids():
     global grid
     global new_grid
@@ -114,13 +117,14 @@ def swap_grids():
     new_grid = temp
 
 def draw_grid(first_time):
-    for row in range(GRID_HEIGHT):
-        for col in range(GRID_WIDTH):
-            cell_color = COLORS[new_grid[row][col]]
-            old_color = COLORS[grid[row][col]]
-            if cell_color != old_color or first_time or cell_color == BLACK:
-                cell_rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-                pygame.draw.rect(screen, cell_color, cell_rect)
+    if DISPLAY:
+        for row in range(GRID_HEIGHT):
+            for col in range(GRID_WIDTH):
+                cell_color = COLORS[new_grid[row][col]]
+                old_color = COLORS[grid[row][col]]
+                if cell_color != old_color or first_time or cell_color == BLACK:
+                    cell_rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                    pygame.draw.rect(screen, cell_color, cell_rect)
 
 def step():
     global new_grid
@@ -140,35 +144,38 @@ def step():
 
 def get_neighbors(row, col):
     neighbors = []
-    for i in range(row - NEIGHBORHOOD_RADIUS, row + NEIGHBORHOOD_RADIUS + 1):
-        for j in range(col - NEIGHBORHOOD_RADIUS, col + NEIGHBORHOOD_RADIUS + 1):
-            if i < GRID_HEIGHT and j < GRID_WIDTH:
-                if i == GRID_HEIGHT:
-                    i = -1
-                if j == GRID_WIDTH:
-                    j = -1
-                if grid[i][j] != 0:
-                    neighbors.append(grid[i][j])
+    for i in range(row - 1, row + 2):
+        for j in range(col - 1, col + 2):
+            if i == GRID_HEIGHT:
+                i = -1
+            if j == GRID_WIDTH:
+                j = -1
+            if grid[i][j] != 0:
+                neighbors.append(grid[i][j])
     return neighbors
 
-# def rebellion(rebel_color, against_color, success_rate):
-#     if rebel_color != against_color:
-#         for row in range(GRID_HEIGHT):
-#             for col in range(GRID_WIDTH):
-#                 if new_grid[row][col] == against_color and random.uniform(0, 1) <= success_rate:
-#                     new_grid[row][col] = rebel_color
+def collect_samples():
+    global new_grid
+    global rounds_played
+    if len(colors_remaining) == 1 and SAMPLE_SIZE > 0:
+        rounds_played += 1
+        for row in range(GRID_HEIGHT):
+            for col in range(GRID_WIDTH):
+                if grid[row][col] != 0:
+                    grid[row][col] = initial_state(row, col)
+        new_grid = copy.deepcopy(grid)
+        # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
+        # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
+        draw_grid(True)
+        pygame.display.flip()
+        winning_teams.update(tuple(colors_remaining))
+        percent_samples_taken = 100 * rounds_played / SAMPLE_SIZE
+        if percent_samples_taken % 5 == 0:
+            print(f"Sample Progress: {percent_samples_taken}%")
 
-# def attempt_rebellion():
-#     if random.uniform(0, 1) <= REBELLION_PROBABILITY:
-#         against_color = random.choice(list(colors_remaining))
-#         rebel_color = random.choice(list(COLORS.keys()))
-#         while (rebel_color == against_color):
-#             rebel_color = random.choice(list(COLORS.keys()))
-#         rebellion(rebel_color, against_color, REBELLION_SUCCESS_RATE)
-
-if DISPLAY:
-    draw_grid(True)
-    pygame.display.flip()
+create_grid()
+draw_grid(True)
+pygame.display.flip()
 running = True
 mouse_pressed = False
 while running:
@@ -176,6 +183,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+            DISPLAY = not DISPLAY
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pressed = True
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -191,24 +200,12 @@ while running:
                 grid[row][col] = 0
                 new_grid[row][col] = 0
     step()
-    # attempt_rebellion()
-    if DISPLAY:
-        draw_grid(False)
+    draw_grid(False)
     swap_grids()
-    if DISPLAY:
-        pygame.display.flip()
-
-    # if len(colors_remaining) == 1 and SAMPLE_SIZE > 0:
-    #     grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
-    #     new_grid = copy.deepcopy(grid)
-    #     if DISPLAY:
-    #         draw_grid(True)
-    #         pygame.display.flip()
-    #     winning_teams.update(tuple(colors_remaining))
-    #     print(f"Round {rounds_played} complete")
-    #     if rounds_played >= SAMPLE_SIZE:
-    #         running = False
-    #     rounds_played += 1
+    pygame.display.flip()
+    collect_samples()
+    if rounds_played >= SAMPLE_SIZE > 0:
+        running = False
     
 print(winning_teams)
 
