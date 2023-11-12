@@ -1,7 +1,7 @@
 import random
 import numpy
 
-sample_size = int(1E4)
+sample_size = int(1E6)
 
 def random_f_value():
     result = 0
