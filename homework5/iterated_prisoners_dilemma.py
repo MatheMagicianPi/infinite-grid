@@ -39,6 +39,8 @@ def my_strategy(opponent_history):
         return False
     return tit_for_tat(opponent_history)
     
+def coin_flip(opponent_history):
+    return random.randint(0, 1)
 
 def play_one_prisoners_dilemma(a_strategy, b_strategy):
     global a_score, b_score, a_history, b_history
