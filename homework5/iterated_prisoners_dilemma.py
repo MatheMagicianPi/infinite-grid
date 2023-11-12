@@ -34,6 +34,11 @@ def grim_trigger(opponent_history):
         return False
     return True
 
+def delayed_tit_for_tat(opponent_history):
+    if len(opponent_history) in (0, 1):
+        return True
+    return opponent_history[-2]
+
 def play_one_prisoners_dilemma(a_strategy, b_strategy):
     global a_score, b_score, a_history, b_history
     a_move = a_strategy(b_history)
@@ -52,6 +57,6 @@ def reset():
     b_score = 0
 
 for _ in range(random_game_length()):
-    play_one_prisoners_dilemma(grim_trigger, grim_trigger)
+    play_one_prisoners_dilemma(delayed_tit_for_tat, grim_trigger)
 
-print(str((a_score, b_score)))
+print("Final score:", str((a_score, b_score)))
