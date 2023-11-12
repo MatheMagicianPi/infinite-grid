@@ -13,9 +13,9 @@ def prisoners_dilemma_result(a_coop, b_coop):
     if a_coop and b_coop:
         return (2, 2)
     if a_coop and not b_coop:
-        return (3, 0)
-    if not a_coop and b_coop:
         return (0, 3)
+    if not a_coop and b_coop:
+        return (3, 0)
     return (1, 1)
 
 def always_cooperate(opponent_history):
@@ -34,10 +34,11 @@ def grim_trigger(opponent_history):
         return False
     return True
 
-def delayed_tit_for_tat(opponent_history):
-    if len(opponent_history) in (0, 1):
-        return True
-    return opponent_history[-2]
+def my_strategy(opponent_history):
+    if len(opponent_history) >= 3 and len(set(opponent_history[-3:])) == 1:
+        return False
+    return tit_for_tat(opponent_history)
+    
 
 def play_one_prisoners_dilemma(a_strategy, b_strategy):
     global a_score, b_score, a_history, b_history
@@ -57,6 +58,6 @@ def reset():
     b_score = 0
 
 for _ in range(random_game_length()):
-    play_one_prisoners_dilemma(delayed_tit_for_tat, grim_trigger)
+    play_one_prisoners_dilemma(my_strategy, grim_trigger)
 
 print("Final score:", str((a_score, b_score)))
