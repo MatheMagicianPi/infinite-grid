@@ -1,0 +1,23 @@
+from sympy import symbols, Matrix, simplify, expand
+
+# Define symbolic variables for p and q
+p1, p2 = symbols('p1 p2')
+p3 = 1 - p1 - p2
+q1, q2 = symbols('q1 q2')
+q3 = 1 - q1 - q2
+
+# Create a 3x3 matrix A
+P = Matrix([[1, 2, 4],
+            [-3, 0, 2],
+            [1, 2, 1]])
+
+# Create symbolic vectors p and q
+p = Matrix([p1, p2, p3])
+q = Matrix([q1, q2, q3])
+
+# Calculate the dot product of q and A*p
+result = simplify(expand(q.dot(P*p)))
+# (np.transpose(P)*q).dot(p)
+
+# Print the result
+print(f"The dot product of q and A*p is: {result}")
