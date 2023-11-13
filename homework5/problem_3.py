@@ -22,7 +22,8 @@ q_values = {q1: 0, q2: 1}  # Assign specific values to q1 and q2
 
 # Calculate the dot product of q and A*p
 result = simplify(expand(q.dot(P*p).subs(p_values).subs(q_values)))
-result = simplify(expand(q.dot(P*p)))
+# result = simplify(expand(q.dot(P*p))
+# result = (P*p).subs({p1: (1 - 3 * p2) / 5})
 
 # Print the result
 print(f"{result}")
