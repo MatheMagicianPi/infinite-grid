@@ -4,17 +4,18 @@ import sys
 import random
 from collections import Counter
 import time
+import matplotlib.pyplot as plt
 
 # Constants
-CELL_SIZE = 10; GRID_HEIGHT = 21; GRID_WIDTH = 1 * GRID_HEIGHT
+CELL_SIZE = 20; GRID_HEIGHT = 10; GRID_WIDTH = 10
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
 
 DISPLAY = True
-SAMPLE_SIZE = 0
+SAMPLE_SIZE = 1000
 
 COUNTDOWN = 0
-STRENGTH_IN_NUMBERS = 0
+STRENGTH_IN_NUMBERS = 1
 
 # Colors
 BLACK = (0, 0, 0)
@@ -66,25 +67,30 @@ new_grid = None
 
 colors_remaining = set()
 winning_teams = Counter()
+round_lengths = []
 rounds_played = 0
+steps_this_round = 0
 
 def initial_state(row, col):
-    # return random.randint(1, 3)
-    # return random.choices((1, 2, 3), [0.97, 0.02, 0.01], k=1)[0]
+    return random.randint(1, 3)
+    # return random.choices((1, 4), [0.5, 0.5], k=1)[0]
     # return 1
-    if col < GRID_WIDTH / 3:
-        return 5
-    if GRID_WIDTH / 3 <= col <= 2 * GRID_WIDTH / 3:
-        return 7
-    if 2 * GRID_WIDTH / 3 < col:
-        return 9
+    # if col < GRID_WIDTH / 3:
+    #     return 5
+    # if GRID_WIDTH / 3 <= col < 2 * GRID_WIDTH / 3:
+    #     return 7
+    # if 2 * GRID_WIDTH / 3 <= col:
+    #     return 9
+
+def adjust_grid():
+    global grid
+    # grid[0][0] = 4
 
 def create_grid():
     global grid
     global new_grid
     grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
-    # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
-    # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
+    adjust_grid()
     new_grid = copy.deepcopy(grid)
 
 def choose_next_state(neighbors):
@@ -129,6 +135,7 @@ def draw_grid(first_time):
 def step():
     global new_grid
     global grid
+    global steps_this_round
     colors_remaining.clear()
     for row in range(GRID_HEIGHT):
         for col in range(GRID_WIDTH):
@@ -141,15 +148,20 @@ def step():
                 if n != 0:
                     new_grid[row][col] = n
                     colors_remaining.add(n)
+    steps_this_round += 1
 
 def get_neighbors(row, col):
     neighbors = []
     for i in range(row - 1, row + 2):
         for j in range(col - 1, col + 2):
             if i == GRID_HEIGHT:
-                i = -1
+                i = 0
             if j == GRID_WIDTH:
-                j = -1
+                j = 0
+            if i == -1:
+                i = GRID_HEIGHT - 1
+            if j == -1:
+                j = GRID_WIDTH - 1
             if grid[i][j] != 0:
                 neighbors.append(grid[i][j])
     return neighbors
@@ -157,18 +169,21 @@ def get_neighbors(row, col):
 def collect_samples():
     global new_grid
     global rounds_played
+    global round_lengths
+    global steps_this_round
     if len(colors_remaining) == 1 and SAMPLE_SIZE > 0:
         rounds_played += 1
+        round_lengths.append(steps_this_round)
+        winning_teams.update(tuple(colors_remaining))
+        steps_this_round = 0
         for row in range(GRID_HEIGHT):
             for col in range(GRID_WIDTH):
                 if grid[row][col] != 0:
                     grid[row][col] = initial_state(row, col)
         new_grid = copy.deepcopy(grid)
-        # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
-        # grid[random.randint(0, GRID_HEIGHT - 1)][random.randint(0, GRID_WIDTH - 1)] = 2
+        adjust_grid()
         draw_grid(True)
         pygame.display.flip()
-        winning_teams.update(tuple(colors_remaining))
         percent_samples_taken = 100 * rounds_played / SAMPLE_SIZE
         if percent_samples_taken % 5 == 0:
             print(f"Sample Progress: {percent_samples_taken}%")
@@ -208,6 +223,16 @@ while running:
         running = False
     
 print(winning_teams)
+# # Create a line plot
+# plt.bar(range(len(round_lengths)), round_lengths)
+
+# # Add labels and title
+# plt.xlabel('X-axis Label')
+# plt.ylabel('Y-axis Label')
+# plt.title('Line Graph of Integers')
+
+# # Show the plot
+# plt.show()
 
 # Quit Pygame
 pygame.quit()
