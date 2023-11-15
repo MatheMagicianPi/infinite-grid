@@ -73,7 +73,7 @@ steps_this_round = 0
 
 def initial_state(row, col):
     # return random.randint(1, 3)
-    return random.choices((1, 4), [0.5, 0.5], k=1)[0]
+    return random.choices((1, 4), [0.8, 0.2], k=1)[0]
     # return 1
     # if col < GRID_WIDTH / 3:
     #     return 5
