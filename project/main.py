@@ -4,18 +4,17 @@ import sys
 import random
 from collections import Counter
 import time
-import matplotlib.pyplot as plt
 
 # Constants
-CELL_SIZE = 20; GRID_HEIGHT = 10; GRID_WIDTH = 10
+CELL_SIZE = 10; GRID_HEIGHT = 60; GRID_WIDTH = 120
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
 
-DISPLAY = False
-SAMPLE_SIZE = 10000
+DISPLAY = True
+SAMPLE_SIZE = 0
 
 COUNTDOWN = 0
-STRENGTH_IN_NUMBERS = 1
+STRENGTH_IN_NUMBERS = 0
 
 # Colors
 BLACK = (0, 0, 0)
@@ -72,9 +71,10 @@ rounds_played = 0
 steps_this_round = 0
 
 def initial_state(row, col):
-    # return random.randint(1, 3)
-    return random.choices((1, 4), [0.8, 0.2], k=1)[0]
-    # return 1
+    return random.randint(1, 19)
+    # return random.choice((9, 10))
+    # return random.choices((1, 4), [0.8, 0.2], k=1)[0]
+    # return 10
     # if col < GRID_WIDTH / 3:
     #     return 5
     # if GRID_WIDTH / 3 <= col < 2 * GRID_WIDTH / 3:
@@ -84,7 +84,7 @@ def initial_state(row, col):
 
 def adjust_grid():
     global grid
-    # grid[0][0] = 4
+    # grid[0][0] = 9
 
 def create_grid():
     global grid
