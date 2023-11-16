@@ -6,14 +6,14 @@ from collections import Counter
 import time
 
 # Constants
-CELL_SIZE = 10; GRID_HEIGHT = 60; GRID_WIDTH = 120
+CELL_SIZE = 10; GRID_HEIGHT = 10; GRID_WIDTH = 10
 WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
 WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
 
-DISPLAY = True
-SAMPLE_SIZE = 0
+DISPLAY = False
+SAMPLE_SIZE = 1000
 
-COUNTDOWN = 0
+TIME_BETWEEN_STEPS = 0
 STRENGTH_IN_NUMBERS = 0
 
 # Colors
@@ -71,9 +71,9 @@ rounds_played = 0
 steps_this_round = 0
 
 def initial_state(row, col):
-    return random.randint(1, 19)
+    # return random.randint(1, 19)
     # return random.choice((9, 10))
-    # return random.choices((1, 4), [0.8, 0.2], k=1)[0]
+    return random.choices((1, 4, 9, 10), [0.1, 0.2, 0.3, 0.4], k=1)[0]
     # return 10
     # if col < GRID_WIDTH / 3:
     #     return 5
@@ -86,9 +86,11 @@ def adjust_grid():
     global grid
     # grid[0][0] = 9
 
+def report_results():
+    print(winning_teams)
+
 def create_grid():
-    global grid
-    global new_grid
+    global grid, new_grid
     grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
     adjust_grid()
     new_grid = copy.deepcopy(grid)
@@ -100,24 +102,16 @@ def choose_next_state(neighbors):
     return random.choice(neighbors)
 
 def most_common_elements(input_list):
-    # Use Counter to count element occurrences
     count = Counter(input_list)
-    
-    # Find the maximum count
     max_count = max(count.values())
-    
-    # Create a list of elements with the maximum count
     most_common = [item for item, freq in count.items() if freq == max_count]
-    
     return most_common
 
-# Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 def swap_grids():
-    global grid
-    global new_grid
+    global grid, new_grid
     temp = grid
     grid = new_grid
     new_grid = temp
@@ -133,13 +127,10 @@ def draw_grid(first_time):
                     pygame.draw.rect(screen, cell_color, cell_rect)
 
 def step():
-    global new_grid
-    global grid
-    global steps_this_round
+    global grid, new_grid, steps_this_round
     colors_remaining.clear()
     for row in range(GRID_HEIGHT):
         for col in range(GRID_WIDTH):
-            # neighbor domination
             if grid[row][col] == 0:
                 new_grid[row][col] = 0
             else:
@@ -167,10 +158,7 @@ def get_neighbors(row, col):
     return neighbors
 
 def collect_samples():
-    global new_grid
-    global rounds_played
-    global round_lengths
-    global steps_this_round
+    global new_grid, rounds_played, round_lengths, steps_this_round
     if len(colors_remaining) == 1 and SAMPLE_SIZE > 0:
         rounds_played += 1
         round_lengths.append(steps_this_round)
@@ -194,7 +182,7 @@ pygame.display.flip()
 running = True
 mouse_pressed = False
 while running:
-    time.sleep(COUNTDOWN)
+    time.sleep(TIME_BETWEEN_STEPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -205,12 +193,9 @@ while running:
         elif event.type == pygame.MOUSEBUTTONUP:
             mouse_pressed = False
         elif event.type == pygame.MOUSEMOTION and mouse_pressed:
-            # Get the mouse position and convert it to grid coordinates
             mouse_x, mouse_y = event.pos
             col = mouse_x // CELL_SIZE
             row = mouse_y // CELL_SIZE
-
-            # Change the color of the cell at the mouse position
             if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
                 grid[row][col] = 0
                 new_grid[row][col] = 0
@@ -222,18 +207,7 @@ while running:
     if rounds_played >= SAMPLE_SIZE > 0:
         running = False
     
-print(winning_teams)
-# # Create a line plot
-# plt.bar(range(len(round_lengths)), round_lengths)
+report_results()
 
-# # Add labels and title
-# plt.xlabel('X-axis Label')
-# plt.ylabel('Y-axis Label')
-# plt.title('Line Graph of Integers')
-
-# # Show the plot
-# plt.show()
-
-# Quit Pygame
 pygame.quit()
 sys.exit()
