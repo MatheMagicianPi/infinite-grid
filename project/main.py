@@ -5,18 +5,34 @@ import random
 from collections import Counter
 import time
 
-# Constants
-CELL_SIZE = 10; GRID_HEIGHT = 10; GRID_WIDTH = 10
-WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
-WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
+# Adjustable Settings
 
-DISPLAY = False
+CELL_SIZE = 10; GRID_HEIGHT = 9; GRID_WIDTH = 9
+
+DISPLAY_VISUALS = True
 SAMPLE_SIZE = 1000
 
 TIME_BETWEEN_STEPS = 0
 STRENGTH_IN_NUMBERS = 0
 
-# Colors
+def initial_state_of_cell(row, col):
+    # return random.randint(1, 19)
+    # return random.choice((9, 10))
+    # return random.choices((1, 4, 9), [0.9, 0.07, 0.03], k=1)[0]
+    # return 10
+    if col < 5:
+        return 1
+    if 5 <= col < 8:
+        return 4
+    if 8 <= col:
+        return 9
+
+def adjust_initial_state_grid():
+    global grid
+    # grid[0][0] = 9
+
+# Only adjust code beyond this point if you know what you are doing
+
 BLACK = (0, 0, 0)
 RED = (255, 130, 71)
 ORANGE = (255, 182, 83)
@@ -61,6 +77,9 @@ COLORS = {
     19: LIME
 }
 
+WINDOW_WIDTH = CELL_SIZE * GRID_WIDTH
+WINDOW_HEIGHT = CELL_SIZE * GRID_HEIGHT
+
 grid = None
 new_grid = None
 
@@ -70,29 +89,17 @@ round_lengths = []
 rounds_played = 0
 steps_this_round = 0
 
-def initial_state(row, col):
-    # return random.randint(1, 19)
-    # return random.choice((9, 10))
-    return random.choices((1, 4, 9, 10), [0.1, 0.2, 0.3, 0.4], k=1)[0]
-    # return 10
-    # if col < GRID_WIDTH / 3:
-    #     return 5
-    # if GRID_WIDTH / 3 <= col < 2 * GRID_WIDTH / 3:
-    #     return 7
-    # if 2 * GRID_WIDTH / 3 <= col:
-    #     return 9
-
-def adjust_grid():
-    global grid
-    # grid[0][0] = 9
+fpst_start = None
+fpst_end = None
+five_percent_sampling_time = None
 
 def report_results():
     print(winning_teams)
 
 def create_grid():
     global grid, new_grid
-    grid = [[initial_state(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
-    adjust_grid()
+    grid = [[initial_state_of_cell(row, col) for col in range(GRID_WIDTH)] for row in range(GRID_HEIGHT)]
+    adjust_initial_state_grid()
     new_grid = copy.deepcopy(grid)
 
 def choose_next_state(neighbors):
@@ -117,7 +124,7 @@ def swap_grids():
     new_grid = temp
 
 def draw_grid(first_time):
-    if DISPLAY:
+    if DISPLAY_VISUALS:
         for row in range(GRID_HEIGHT):
             for col in range(GRID_WIDTH):
                 cell_color = COLORS[new_grid[row][col]]
@@ -158,7 +165,7 @@ def get_neighbors(row, col):
     return neighbors
 
 def collect_samples():
-    global new_grid, rounds_played, round_lengths, steps_this_round
+    global new_grid, rounds_played, round_lengths, steps_this_round, fpst_start, fpst_end, five_percent_sampling_time
     if len(colors_remaining) == 1 and SAMPLE_SIZE > 0:
         rounds_played += 1
         round_lengths.append(steps_this_round)
@@ -167,27 +174,29 @@ def collect_samples():
         for row in range(GRID_HEIGHT):
             for col in range(GRID_WIDTH):
                 if grid[row][col] != 0:
-                    grid[row][col] = initial_state(row, col)
+                    grid[row][col] = initial_state_of_cell(row, col)
         new_grid = copy.deepcopy(grid)
-        adjust_grid()
+        adjust_initial_state_grid()
         draw_grid(True)
         pygame.display.flip()
         percent_samples_taken = 100 * rounds_played / SAMPLE_SIZE
         if percent_samples_taken % 5 == 0:
-            print(f"Sample Progress: {percent_samples_taken}%")
+            fpst_end = time.time()
+            five_percent_sampling_time = fpst_end - fpst_start
+            print(f"Sample Progress: {percent_samples_taken}% in {round(five_percent_sampling_time, 2)} seconds")
+            fpst_start = time.time()
 
 create_grid()
 draw_grid(True)
 pygame.display.flip()
 running = True
 mouse_pressed = False
+fpst_start = time.time()
 while running:
     time.sleep(TIME_BETWEEN_STEPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-            DISPLAY = not DISPLAY
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pressed = True
         elif event.type == pygame.MOUSEBUTTONUP:
