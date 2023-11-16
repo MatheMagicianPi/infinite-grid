@@ -10,12 +10,17 @@ new_grid = None
 
 # Define a function to generate a vector for each cell
 def initial_vector(row, col):
-    if col < 3:
-        return np.array([1, 0, 0])
-    if 3 <= col < 6:
-        return np.array([0, 1, 0])
-    if 6 <= col < 9:
-        return np.array([0, 0, 1])
+    # return np.array([1.0, 0.0])
+    if col < 5:
+        return np.array([1.0, 0.0, 0.0])
+    if 5 <= col < 8:
+        return np.array([0.0, 1.0, 0.0])
+    if 8 <= col < 9:
+        return np.array([0.0, 0.0, 1.0])
+
+def adjust_grid():
+    global grid
+    # grid[0][0] = np.array([0.0, 1.0])
 
 def swap_grids():
     global grid, new_grid
@@ -23,19 +28,19 @@ def swap_grids():
     grid = new_grid
     new_grid = temp
 
-def get_neighbors(col, row):
+def get_neighbors(row, col):
     neighbors = []
     for i in range(col - 1, col + 2):
         for j in range(row - 1, row + 2):
-            if i == rows:
+            if i == cols:
                 i = 0
-            if j == cols:
+            if j == rows:
                 j = 0
             if i == -1:
-                i = rows - 1
+                i = cols - 1
             if j == -1:
-                j = cols - 1
-            neighbors.append(grid[i][j])
+                j = rows - 1
+            neighbors.append(grid[j][i])
     return neighbors
 
 def average_vectors(vectors):
@@ -56,15 +61,37 @@ def average_vectors(vectors):
 
     return average_vector
 
+def sum_array(array_2d):
+    # Get the length of the vectors
+    vector_length = len(array_2d[0][0])
+
+    # Initialize a list to store the sum of each component
+    sum_components = [0] * vector_length
+
+    # Calculate the sum of each component
+    for row in array_2d:
+        for vector in row:
+            if len(vector) != vector_length:
+                raise ValueError("All vectors must have the same length")
+            sum_components = [sum(x) for x in zip(sum_components, vector)]
+
+    # Create a vector representing the sum
+    sum_vector = np.array(sum_components)
+
+    return sum_vector
+
 # Create a 2D array with vectors in each cell
-grid = np.array([[initial_vector(col, row) for col in range(cols)] for row in range(rows)])
+grid = np.array([[initial_vector(col, row) for row in range(rows)] for col in range(cols)])
+adjust_grid()
 new_grid = copy.deepcopy(grid)
 
-for _ in range(1):
-    for row in range(cols):
-        for col in range(rows):
-            new_grid[col][row] = average_vectors(get_neighbors(col, row))
+for _ in range(10000):
+    for col in range(cols):
+        for row in range(rows):
+            next_cell = average_vectors(get_neighbors(col, row))
+            new_grid[col][row] = next_cell
             swap_grids()
 
 # Print the resulting 2D array
 print(grid)
+print(sum_array(grid))
