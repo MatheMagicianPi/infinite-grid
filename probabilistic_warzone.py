@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+import random
 
 # Using NumPy arrays
 rows = 10
@@ -11,17 +12,18 @@ new_grid = None
 
 # Define a function to generate a vector for each cell
 def initial_vector(row, col):
-    return np.array([1.0, 0.0])
-    # if col < 10:
+    # return random.choice((np.array([1.0, 0.0]), np.array([0.0, 1.0])))
+    return np.array([0.5, 0.5])
+    # if col < cols / 3 + 2:
     #     return np.array([1.0, 0.0, 0.0])
-    # if 10 <= col < 14:
+    # if cols / 3 + 2 <= col < 2 * cols / 3 + 2:
     #     return np.array([0.0, 1.0, 0.0])
-    # if 14 <= col < 15:
+    # if 2 * cols / 3 + 2 <= col:
     #     return np.array([0.0, 0.0, 1.0])
 
 def adjust_grid():
     global grid
-    grid[7][3] = np.array([0.0, 1.0])
+    grid[7][3] = np.array([0.0, 0.0])
     # grid[0][1] = np.array([0.0, 1.0])
     # grid[1][0] = np.array([0.0, 1.0])
     # grid[1][1] = np.array([0.0, 1.0])
@@ -38,13 +40,14 @@ def get_neighbors(row, col):
         for j in range(col - 1, col + 2):
             if i == rows:
                 i = 0
+            elif i == -1:
+                i = rows - 1
             if j == cols:
                 j = 0
-            if i == -1:
-                i = rows - 1
-            if j == -1:
+            elif j == -1:
                 j = cols - 1
-            neighbors.append(grid[i][j])
+            if not np.all(grid[i][j] == 0.0):
+                neighbors.append(grid[i][j])
     return neighbors
 
 def average_vectors(vectors):
@@ -101,10 +104,12 @@ new_grid = copy.deepcopy(grid)
 for _ in range(samples):
     for row in range(rows):
         for col in range(cols):
-            next_cell = average_vectors(get_neighbors(row, col))
-            new_grid[row][col] = next_cell
-            swap_grids()
+            if np.all(grid[row][col] == 0.0):
+                new_grid[row][col] = grid[row][col]
+            else:
+                new_grid[row][col] = average_vectors(get_neighbors(row, col))
+    swap_grids()
 
 # Print the resulting 2D array
 print(grid)
-print(normalize(sum_array(grid)))
+# print(normalize(sum_array(grid)))
