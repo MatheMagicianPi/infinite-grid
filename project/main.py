@@ -10,7 +10,7 @@ import time
 CELL_SIZE = 10; GRID_HEIGHT = 6; GRID_WIDTH = 6
 
 DISPLAY_VISUALS = False
-SAMPLE_SIZE = 100000
+SAMPLE_SIZE = 1000
 
 TIME_BETWEEN_STEPS = 0
 STRENGTH_IN_NUMBERS = 0
@@ -18,17 +18,18 @@ STRENGTH_IN_NUMBERS = 0
 def initial_state_of_cell(row, col):
     # return random.randint(1, 19)
     # return random.choice((9, 10))
-    # return random.choices((1, 4, 9), [0.9, 0.07, 0.03], k=1)[0]
+    return random.choices((1, 4, 9), [0.9, 0.07, 0.03], k=1)[0]
     # return 10
-    if col < 2:
-        return 1
-    if 2 <= col < 4:
-        return 4
-    if 4 <= col:
-        return 9
+    # if col < 2:
+    #     return 1
+    # if 2 <= col < 4:
+    #     return 4
+    # if 4 <= col:
+    #     return 9
 
 def adjust_initial_state_grid():
     global grid
+    # grid[0][0] = 0
     # grid[7][3] = 9
     # grid[0][1] = 9
 

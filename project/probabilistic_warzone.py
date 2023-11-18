@@ -3,9 +3,9 @@ import copy
 import random
 
 # Using NumPy arrays
-rows = 10
-cols = 10
-samples = 1000
+rows = 15
+cols = 15
+samples = 300
 
 grid = None
 new_grid = None
@@ -13,20 +13,24 @@ new_grid = None
 # Define a function to generate a vector for each cell
 def initial_vector(row, col):
     # return random.choice((np.array([1.0, 0.0]), np.array([0.0, 1.0])))
-    return np.array([0.5, 0.5])
-    # if col < cols / 3 + 2:
-    #     return np.array([1.0, 0.0, 0.0])
-    # if cols / 3 + 2 <= col < 2 * cols / 3 + 2:
-    #     return np.array([0.0, 1.0, 0.0])
-    # if 2 * cols / 3 + 2 <= col:
-    #     return np.array([0.0, 0.0, 1.0])
+    # return np.array([0.5, 0.5])
+    if col < cols / 3:
+        return np.array([1.0, 0.0, 0.0])
+    if cols / 3 <= col < 2 * cols / 3:
+        return np.array([0.0, 1.0, 0.0])
+    if 2 * cols / 3 <= col:
+        return np.array([0.0, 0.0, 1.0])
 
 def adjust_grid():
     global grid
-    grid[7][3] = np.array([0.0, 0.0])
-    # grid[0][1] = np.array([0.0, 1.0])
-    # grid[1][0] = np.array([0.0, 1.0])
-    # grid[1][1] = np.array([0.0, 1.0])
+    for row in range(rows):
+        for col in range(cols):
+            if row == 2 or row == 12:
+                if 2 <= col <= 12:
+                    grid[row][col] = np.array([0.0, 0.0, 0.0])
+            elif col == 2 or col == 12:
+                if 2 <= row <= 12:
+                    grid[row][col] = np.array([0.0, 0.0, 0.0])
 
 def swap_grids():
     global grid, new_grid
@@ -46,10 +50,10 @@ def get_neighbors(row, col):
                 j = 0
             elif j == -1:
                 j = cols - 1
-            if not np.all(grid[i][j] == 0.0):
+            if not is_zero(grid[i][j]):
                 neighbors.append(grid[i][j])
     return neighbors
-
+ 
 def average_vectors(vectors):
     # Get the length of the vectors
     vector_length = len(vectors[0])
@@ -96,6 +100,9 @@ def normalize(input_list):
     
     return normalized_list
 
+def is_zero(vector):
+    return np.all(vector == 0.0)
+
 # Create a 2D array with vectors in each cell
 grid = np.array([[initial_vector(row, col) for col in range(cols)] for row in range(rows)])
 adjust_grid()
@@ -104,7 +111,7 @@ new_grid = copy.deepcopy(grid)
 for _ in range(samples):
     for row in range(rows):
         for col in range(cols):
-            if np.all(grid[row][col] == 0.0):
+            if is_zero(grid[row][col]):
                 new_grid[row][col] = grid[row][col]
             else:
                 new_grid[row][col] = average_vectors(get_neighbors(row, col))
