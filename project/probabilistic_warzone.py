@@ -3,8 +3,8 @@ import copy
 import random
 
 # Using NumPy arrays
-rows = 5
-cols = 5
+rows = 10
+cols = 10
 samples = 1000
 
 grid = None
@@ -13,26 +13,33 @@ new_grid = None
 # Define a function to generate a vector for each cell
 def initial_vector(row, col):
     # return random.choice((np.array([1.0, 0.0]), np.array([0.0, 1.0])))
-    return np.array([0.0, 1.0])
-    # if col < cols / 3:
+    return np.array([1.0, 0.0])
+    # if col < cols / 3 + 5:
     #     return np.array([1.0, 0.0, 0.0])
-    # if cols / 3 <= col < 2 * cols / 3:
+    # if cols / 3 + 5 <= col < 2 * cols / 3 + 5 - 1:
     #     return np.array([0.0, 1.0, 0.0])
-    # if 2 * cols / 3 <= col:
+    # if 2 * cols / 3 + 2 - 1 <= col:
     #     return np.array([0.0, 0.0, 1.0])
 
 def adjust_grid():
     global grid
     for row in range(rows):
         for col in range(cols):
-            if row == 1 or row == 3:
-                if 1 <= col <= 3:
+            if row == 2 or row == 7:
+                if 2 <= col <= 7:
                     grid[row][col] = np.array([0.0, 0.0])
-            elif col == 1 or col == 3:
-                if 1 <= row <= 3:
+            elif col == 2 or col == 7:
+                if 2 <= row <= 7:
                     grid[row][col] = np.array([0.0, 0.0])
-    grid[2][2] = np.array([1.0, 0.0])
-    grid[2][3] = np.array([1.0, 0.0])
+            elif 2 < row < 7 and 2 < col < 7:
+                grid[row][col] = np.array([0.0, 1.0])
+    grid[7][4] = np.array([0.0, 1.0])
+    grid[7][5] = np.array([0.0, 1.0])
+    # grid[1][7] = np.array([0.0, 1.0, 0.0])
+    # grid[1][8] = np.array([0.0, 1.0, 0.0])
+    # grid[2][7] = np.array([0.0, 1.0, 0.0])
+    # grid[2][8] = np.array([0.0, 1.0, 0.0])
+    # grid[9][1] = np.array([0.0, 0.0, 1.0])
 
 def swap_grids():
     global grid, new_grid
