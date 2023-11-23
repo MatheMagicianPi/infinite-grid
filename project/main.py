@@ -7,19 +7,19 @@ import time
 
 # Adjustable Settings
 
-CELL_SIZE = 10; GRID_HEIGHT = 10; GRID_WIDTH = 10
+CELL_SIZE = 20; GRID_HEIGHT = 30; GRID_WIDTH = 60
 
-DISPLAY_VISUALS = False
-SAMPLE_SIZE = 10000
+DISPLAY_VISUALS = True
+SAMPLE_SIZE = 0
 
 TIME_BETWEEN_STEPS = 0
-STRENGTH_IN_NUMBERS = 0
+STRENGTH_IN_NUMBERS = 5
 
 def initial_state_of_cell(row, col):
-    # return random.randint(1, 19)
-    # return random.choice((9, 10))
+    return random.randint(1, 19)
+    # return random.choice((15, 5))
     # return random.choices((1, 4), [0.5, 0.5], k=1)[0]
-    return 10
+    # return 10
     # if col < 2:
     #     return 1
     # if 2 <= col < 4:
@@ -42,8 +42,8 @@ def adjust_initial_state_grid():
     #                 grid[row][col] = 0
     #         elif 2 < row < 7 and 2 < col < 7:
     #             grid[row][col] = 9
-    grid[4][7] = 8
-    grid[9][1] = 9
+    # grid[4][7] = 8
+    # grid[9][1] = 9
 
 # Only adjust code beyond this point if you know what you are doing
 
