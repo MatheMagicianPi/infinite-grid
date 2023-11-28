@@ -13,7 +13,7 @@ DISPLAY_VISUALS = True
 SAMPLE_SIZE = 0
 
 TIME_BETWEEN_STEPS = 0
-STRENGTH_IN_NUMBERS = 5
+STRENGTH_IN_NUMBERS = 10
 
 def initial_state_of_cell(row, col):
     return random.randint(1, 19)
