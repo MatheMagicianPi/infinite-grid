@@ -22,18 +22,21 @@ def modes_of(input_tuple):
     
     return modes
 
+def sort_dict_by_keys(input_dict):
+    sorted_items = sorted(input_dict.items())
+    return sorted_items
+
 N = 2
-P = 3
+P = 6
 
-for n in range(3, 4):
-    for p in range(2, 20, 1):
-        modes_count = Counter()
-        for t in orderings(n, p):
-            modes_count.update((frozenset(modes_of(t)),))
+for p in range(1, 15):
+    modes_count = Counter()
+    for t in orderings(N, p):
+        modes_count.update((frozenset(modes_of(t)),))
 
-        size_to_score = dict()
+    size_to_score = dict()
 
-        for s in modes_count.keys():
-            size_to_score[len(s)] = modes_count[s]
+    for s in modes_count.keys():
+        size_to_score[len(s)] = modes_count[s]
 
-        print(f"({n}, {p}) -> {size_to_score}")
+    print(f"({N}, {p}) -> {sort_dict_by_keys(size_to_score)} vs guess: [(1, {2**(p-1)}), (2, {2})]")

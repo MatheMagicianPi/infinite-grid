@@ -7,7 +7,7 @@ import time
 
 # Adjustable Settings
 
-CELL_SIZE = 20; GRID_HEIGHT = 30; GRID_WIDTH = 60
+CELL_SIZE = 10; GRID_HEIGHT = 60; GRID_WIDTH = 120
 
 DISPLAY_VISUALS = True
 SAMPLE_SIZE = 0
@@ -20,11 +20,11 @@ def initial_state_of_cell(row, col):
     # return random.choice((15, 5))
     # return random.choices((1, 4), [0.5, 0.5], k=1)[0]
     # return 10
-    # if col < 2:
+    # if col < GRID_WIDTH / 3:
     #     return 1
-    # if 2 <= col < 4:
+    # elif GRID_WIDTH / 3 <= col < 2 * GRID_WIDTH / 3:
     #     return 4
-    # if 4 <= col:
+    # elif 2 * GRID_WIDTH / 3 <= col:
     #     return 9
 
 def adjust_initial_state_grid():
@@ -204,6 +204,7 @@ create_grid()
 draw_grid(True)
 pygame.display.flip()
 running = True
+paused = True
 mouse_pressed = False
 fpst_start = time.time()
 while running:
@@ -222,14 +223,20 @@ while running:
             if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
                 grid[row][col] = 0
                 new_grid[row][col] = 0
-    step()
-    draw_grid(False)
-    swap_grids()
-    pygame.display.flip()
-    collect_samples()
-    if rounds_played >= SAMPLE_SIZE > 0:
-        running = False
-    
+                cell_rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                pygame.draw.rect(screen, BLACK, cell_rect)
+                pygame.display.flip()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                paused = not paused
+    if not paused:
+        step()
+        draw_grid(False)
+        swap_grids()
+        pygame.display.flip()
+        collect_samples()
+        if rounds_played >= SAMPLE_SIZE > 0:
+            running = False
 report_results()
 
 pygame.quit()
