@@ -7,43 +7,36 @@ import time
 
 # Adjustable Settings
 
-CELL_SIZE = 10; GRID_HEIGHT = 60; GRID_WIDTH = 120
+CELL_SIZE = 20; GRID_HEIGHT = 30; GRID_WIDTH = 15
 
 DISPLAY_VISUALS = True
 SAMPLE_SIZE = 0
 
 TIME_BETWEEN_STEPS = 0
-STRENGTH_IN_NUMBERS = 10
+STRENGTH_IN_NUMBERS = 20
 
 def initial_state_of_cell(row, col):
     return random.randint(1, 19)
     # return random.choice((15, 5))
     # return random.choices((1, 4), [0.5, 0.5], k=1)[0]
     # return 10
-    # if col < GRID_WIDTH / 3:
-    #     return 1
-    # elif GRID_WIDTH / 3 <= col < 2 * GRID_WIDTH / 3:
-    #     return 4
-    # elif 2 * GRID_WIDTH / 3 <= col:
-    #     return 9
+    # return row_partition_chooser((2, 5, 7), row)
+    # return col_partition_chooser((6, 12, 18, 2), col)
+    
+def col_partition_chooser(teams, col):
+    n = len(teams)
+    for i in range(n):
+        if i * GRID_WIDTH / n <= col < (i + 1) * GRID_WIDTH / n:
+            return teams[i]
+        
+def row_partition_chooser(teams, row):
+    n = len(teams)
+    for i in range(n):
+        if i * GRID_HEIGHT / n <= row < (i + 1) * GRID_HEIGHT / n:
+            return teams[i]
 
 def adjust_initial_state_grid():
     global grid
-    # grid[0][0] = 0
-    # grid[7][3] = 9
-    # grid[0][1] = 9
-    # for row in range(GRID_HEIGHT):
-    #     for col in range(GRID_WIDTH):
-    #         if row == 2 or row == 7:
-    #             if 2 <= col <= 7:
-    #                 grid[row][col] = 0
-    #         elif col == 2 or col == 7:
-    #             if 2 <= row <= 7:
-    #                 grid[row][col] = 0
-    #         elif 2 < row < 7 and 2 < col < 7:
-    #             grid[row][col] = 9
-    # grid[4][7] = 8
-    # grid[9][1] = 9
 
 # Only adjust code beyond this point if you know what you are doing
 
