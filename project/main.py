@@ -7,21 +7,21 @@ import time
 
 # Adjustable Settings
 
-CELL_SIZE = 20; GRID_HEIGHT = 30; GRID_WIDTH = 15
+CELL_SIZE = 10; GRID_HEIGHT = 30; GRID_WIDTH = 60
 
 DISPLAY_VISUALS = True
 SAMPLE_SIZE = 0
 
 TIME_BETWEEN_STEPS = 0
-STRENGTH_IN_NUMBERS = 20
+STRENGTH_IN_NUMBERS = 10
 
 def initial_state_of_cell(row, col):
     return random.randint(1, 19)
     # return random.choice((15, 5))
-    # return random.choices((1, 4), [0.5, 0.5], k=1)[0]
+    # return random.choices((2, 9), [0.7, 0.3], k=1)[0]
     # return 10
     # return row_partition_chooser((2, 5, 7), row)
-    # return col_partition_chooser((6, 12, 18, 2), col)
+    # return col_partition_chooser((6, 12, 18), col)
     
 def col_partition_chooser(teams, col):
     n = len(teams)
